@@ -136,9 +136,11 @@ class Pacman(gym.Env):
 
         ghost_position = []
         for i in range(self.n_ghosts):
-            ghost_position.append([np.random.randint(26), np.random.randint(29)])
+            #ghost_position.append([np.random.randint(29), np.random.randint(26)])
+            ghost_position.append([13, 11+i])
         
-        pacman_position = [np.random.randint(26), np.random.randint(29)]
+        #pacman_position = [np.random.randint(29), np.random.randint(26)]
+        pacman_position = [16, 11]
 
         return np.array(ghost_position + [pacman_position])
 
@@ -163,4 +165,4 @@ class Pacman(gym.Env):
         return next_pos
 
     def is_valid(self, pos):
-        return (0 <= pos[0] < self.grid[0]) and (0 <= pos[1] < self.grid[1])
+        return (0 <= pos[0] < self.grid[0]) and (0 <= pos[1] < self.grid[1]) and (self.map[pos[0]][pos[1]] == 0)
