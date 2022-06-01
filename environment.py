@@ -100,18 +100,21 @@ class Environment(gym.Env):
         #self.ghosts_done = [False for _ in range(self.n_ghosts)]
         self.reward = {_: 0 for _ in range(self.n_ghosts+1)}
 
-        ghost_position = []
+        agent_positions = []
         #set positions
         for i in range(self.n_ghosts):
             self.map[self.ghosts[i].get_position()[0], self.ghosts[i].get_position()[1]] = 0
             self.ghosts[i].reset_position()
             self.map[self.ghosts[i].get_position()[0], self.ghosts[i].get_position()[1]] = 2
-            ghost_position.append(self.ghosts[i].get_position())
+            agent_positions.append(self.ghosts[i].get_position()[0])
+            agent_positions.append(self.ghosts[i].get_position()[1])
         
         #self.map[self.pacman.get_position()[0], self.pacman.get_position()[1]] = 0
         self.pacman.reset_position()
+        agent_positions.append(self.pacman.get_position()[0])
+        agent_positions.append(self.pacman.get_position()[1])
         #self.map[self.pacman.get_position()[0], self.pacman.get_position()[1]] = 3
-        return ghost_position, self.pacman.get_position()
+        return agent_positions
 
     def step(self, agents_action):
         self.step_count += 1
@@ -141,28 +144,33 @@ class Environment(gym.Env):
                 self.reward[i] += -1
                 self.reward[self.n_ghosts] += 1
 
-        return [self.ghosts[i].get_position() for i in range(self.n_ghosts)] + [self.pacman.get_position()], self.reward, self.pacman.is_alive()
+        agent_positions = []
+
+        for i in range(self.n_ghosts):
+            agent_positions.append(self.ghosts[i].get_position()[0])
+            agent_positions.append(self.ghosts[i].get_position()[1])
+
+        agent_positions.append(self.pacman.get_position()[0])
+        agent_positions.append(self.pacman.get_position()[1])
+
+        return agent_positions, self.reward, self.pacman.is_alive()
 
     def next_position(self, curr_pos, move, id):
         if move == 0:  # down
             next_pos = [curr_pos[0] + 1, curr_pos[1]]
             if not self.is_valid(next_pos, id):
-                #next_pos = [curr_pos[0], curr_pos[1]]
                 next_pos = self.next_position(curr_pos, np.random.randint(4), id)
         elif move == 1:  # left
             next_pos = [curr_pos[0], curr_pos[1] - 1]
             if not self.is_valid(next_pos, id):
-                #next_pos = [curr_pos[0], curr_pos[1]]
                 next_pos = self.next_position(curr_pos, np.random.randint(4), id)
         elif move == 2:  # up
             next_pos = [curr_pos[0] - 1, curr_pos[1]]
             if not self.is_valid(next_pos, id):
-                #next_pos = [curr_pos[0], curr_pos[1]]
                 next_pos = self.next_position(curr_pos, np.random.randint(4), id)
         elif move == 3:  # right
             next_pos = [curr_pos[0], curr_pos[1] + 1]
             if not self.is_valid(next_pos, id):
-                #next_pos = [curr_pos[0], curr_pos[1]]
                 next_pos = self.next_position(curr_pos, np.random.randint(4), id)
         #elif move == 4:  # no-op
         return next_pos

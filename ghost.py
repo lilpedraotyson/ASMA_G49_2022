@@ -1,4 +1,5 @@
 from agent import Agent
+import numpy as np
 
 N_ACTIONS = 4
 DOWN, LEFT, UP, RIGHT = range(N_ACTIONS)
@@ -10,6 +11,10 @@ class Ghost(Agent):
         self.n_agents = n_agents
         self.n_actions = N_ACTIONS
         self.position = [13, 11 + agent_id]
+        self.observation = None
+
+    def see(self, observation: np.ndarray):
+        self.observation = observation
         
     def reset_position(self):
         self.position = [13, 11 + self.agent_id]
@@ -24,4 +29,4 @@ class Ghost(Agent):
         self.position = [line, column]
 
     def action(self) -> int:
-        return 0
+        return np.random.randint(4)

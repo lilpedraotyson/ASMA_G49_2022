@@ -7,13 +7,16 @@ from environment import Environment
 if __name__ == '__main__':
     n_agents = 4
     environment = Environment(n_agents - 1)
-    ghost_pos, pac_pos = environment.reset()
-    print('ghost position: {} pacman position: {}'.format(ghost_pos, pac_pos))
+    observation = environment.reset()
+    print('ghost position: {} pacman position: {}'.format(observation[:(n_agents - 1) * 2], observation[(n_agents - 1) * 2:]))
     
     sleep(1)
     alive = True
     while alive:
-        pos, reward, alive = environment.step([np.random.randint(4) for _ in range(n_agents)])
-        print('positions: {} reward: {} pacman alive?: {}'.format(pos, reward, alive))
+        for i in range(n_agents - 1):
+            environment.ghosts[i].see(observation) 
+        next_obs, reward, alive = environment.step([environment.ghosts[i].action() for i in range(n_agents - 1)] + [environment.pacman.action()])
+        print('positions: {} reward: {} pacman alive?: {}'.format(next_obs, reward, alive))
+        observation = next_obs
         environment.render()
         sleep(1)

@@ -1,4 +1,5 @@
 from agent import Agent
+import numpy as np
 
 N_ACTIONS = 4
 DOWN, LEFT, UP, RIGHT = range(N_ACTIONS)
@@ -9,6 +10,10 @@ class Pacman(Agent):
         self.n_actions = N_ACTIONS
         self.position = [16, 11]
         self.alive = True
+        self.observation = None
+
+    def see(self, observation: np.ndarray):
+        self.observation = observation
         
     def reset_position(self):
         self.position = [16, 11]
@@ -30,4 +35,4 @@ class Pacman(Agent):
         self.alive = False
 
     def action(self) -> int:
-        return 0
+        return np.random.randint(4)
