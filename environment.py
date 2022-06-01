@@ -43,8 +43,8 @@ class Environment(gym.Env):
                             [0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0],
                             [0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0],
                             [0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0],
-                            [1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 0, 0],
-                            [1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 0, 0],
+                            [1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1],
+                            [1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1],
                             [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0],
                             [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
                             [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
@@ -103,10 +103,14 @@ class Environment(gym.Env):
         ghost_position = []
         #set positions
         for i in range(self.n_ghosts):
+            self.map[self.ghosts[i].get_position()[0], self.ghosts[i].get_position()[1]] = 0
             self.ghosts[i].reset_position()
+            self.map[self.ghosts[i].get_position()[0], self.ghosts[i].get_position()[1]] = 2
             ghost_position.append(self.ghosts[i].get_position())
         
+        #self.map[self.pacman.get_position()[0], self.pacman.get_position()[1]] = 0
         self.pacman.reset_position()
+        #self.map[self.pacman.get_position()[0], self.pacman.get_position()[1]] = 3
         return ghost_position, self.pacman.get_position()
 
     def step(self, agents_action):
@@ -115,11 +119,15 @@ class Environment(gym.Env):
         #move
         for agent_i, action in enumerate(agents_action):
             if agent_i < self.n_ghosts:
-                new_ghost_position = self.next_position(copy.copy(self.ghosts[agent_i].get_position()), action)
+                self.map[self.ghosts[agent_i].get_position()[0], self.ghosts[agent_i].get_position()[1]] = 0
+                new_ghost_position = self.next_position(copy.copy(self.ghosts[agent_i].get_position()), action, agent_i)
                 self.ghosts[agent_i].set_position(new_ghost_position[0], new_ghost_position[1])
+                self.map[self.ghosts[agent_i].get_position()[0], self.ghosts[agent_i].get_position()[1]] = 2
             elif self.pacman.is_alive():
-                new_pacman_position = self.next_position(copy.copy(self.pacman.get_position()), action)
+                #self.map[self.pacman.get_position()[0], self.pacman.get_position()[1]] = 0
+                new_pacman_position = self.next_position(copy.copy(self.pacman.get_position()), action, agent_i)
                 self.pacman.set_position(new_pacman_position[0], new_pacman_position[1])
+                #self.map[self.pacman.get_position()[0], self.pacman.get_position()[1]] = 3
 
         for i in range(self.n_ghosts):
             #se apanhar
@@ -135,25 +143,32 @@ class Environment(gym.Env):
 
         return [self.ghosts[i].get_position() for i in range(self.n_ghosts)] + [self.pacman.get_position()], self.reward, self.pacman.is_alive()
 
-    def next_position(self, curr_pos, move):
+    def next_position(self, curr_pos, move, id):
         if move == 0:  # down
             next_pos = [curr_pos[0] + 1, curr_pos[1]]
-            if not self.is_valid(next_pos):
-                next_pos = [curr_pos[0], curr_pos[1]]
+            if not self.is_valid(next_pos, id):
+                #next_pos = [curr_pos[0], curr_pos[1]]
+                next_pos = self.next_position(curr_pos, np.random.randint(4), id)
         elif move == 1:  # left
             next_pos = [curr_pos[0], curr_pos[1] - 1]
-            if not self.is_valid(next_pos):
-                next_pos = [curr_pos[0], curr_pos[1]]
+            if not self.is_valid(next_pos, id):
+                #next_pos = [curr_pos[0], curr_pos[1]]
+                next_pos = self.next_position(curr_pos, np.random.randint(4), id)
         elif move == 2:  # up
             next_pos = [curr_pos[0] - 1, curr_pos[1]]
-            if not self.is_valid(next_pos):
-                next_pos = [curr_pos[0], curr_pos[1]]
+            if not self.is_valid(next_pos, id):
+                #next_pos = [curr_pos[0], curr_pos[1]]
+                next_pos = self.next_position(curr_pos, np.random.randint(4), id)
         elif move == 3:  # right
             next_pos = [curr_pos[0], curr_pos[1] + 1]
-            if not self.is_valid(next_pos):
-                next_pos = [curr_pos[0], curr_pos[1]]
+            if not self.is_valid(next_pos, id):
+                #next_pos = [curr_pos[0], curr_pos[1]]
+                next_pos = self.next_position(curr_pos, np.random.randint(4), id)
         #elif move == 4:  # no-op
         return next_pos
 
-    def is_valid(self, pos):
-        return (0 <= pos[0] < self.grid[0]) and (0 <= pos[1] < self.grid[1]) and (self.map[pos[0]][pos[1]] == 0)
+    def is_valid(self, pos, id):
+        if (id < self.n_ghosts):
+            return (0 <= pos[0] < self.grid[0]) and (0 <= pos[1] < self.grid[1]) and (self.map[pos[0]][pos[1]] != 1) and (self.map[pos[0]][pos[1]] != 2)
+        else:
+            return (0 <= pos[0] < self.grid[0]) and (0 <= pos[1] < self.grid[1]) and (self.map[pos[0]][pos[1]] == 0)
