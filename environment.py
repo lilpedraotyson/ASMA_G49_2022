@@ -3,16 +3,20 @@ import gym
 import numpy as np
 from gym import spaces
 
+from time import sleep #Delete in the end
+
 from ma_gym.envs.utils.action_space import MultiAgentActionSpace
 from ma_gym.envs.utils.observation_space import MultiAgentObservationSpace
 from ma_gym.envs.utils.draw import draw_grid, fill_cell, draw_circle, write_cell_text
 
-class Pacman(gym.Env):
+from ghost import Ghost
+from pacman import Pacman
+
+class Environment(gym.Env):
     def __init__(self, n_ghosts):
         #global variables
         self.n_ghosts = n_ghosts
         self.grid = (29, 26)
-        self.pacman_alive = None
         #self.ghosts_done = [None for _ in range(self.n_ghosts)]
         self.step_count = 0
         self.viewer = None
@@ -49,39 +53,15 @@ class Pacman(gym.Env):
         #action_space = number of action of each agent (UP, DOWN, LEFT, RIGHT)
         self.action_space = MultiAgentActionSpace([spaces.Discrete(4) for _ in range(self.n_ghosts+1)])
 
-        #position -> starts has none
-        self.ghost_position = {_: None for _ in range(self.n_ghosts)}
-        self.pacman_position = None
+        #create agents
+        self.pacman = Pacman()
+        self.ghosts = {i: Ghost(i, self.n_ghosts) for i in range(self.n_ghosts)}
 
         #observation
         self.observation_space = MultiAgentObservationSpace([spaces.Box(low= np.array([0, 0]), high= np.array([29, 26])) for _ in range(self.n_ghosts+1)])
 
         #reward
-        self.reward = None
-
-    def step(self, agents_action):
-        self.step_count += 1
-
-        #move
-        for agent_i, action in enumerate(agents_action):
-            if agent_i < self.n_ghosts:
-                self.ghost_position[agent_i] = self.next_position(copy.copy(self.ghost_position[agent_i]), action)
-            elif self.pacman_alive:
-                self.pacman_position = self.next_position(copy.copy(self.pacman_position), action)
-
-        for i in self.ghost_position:
-            #se apanhar
-            if self.ghost_position[i] == self.pacman_position:
-                self.reward[i] = 5
-                self.reward[self.n_ghosts] = -5
-                self.pacman_alive = False
-            
-            #se n apanhar
-            else:
-                self.reward[i] += -1
-                self.reward[self.n_ghosts] += 1
-
-        return [self.ghost_position[i] for i in self.ghost_position] + [self.pacman_position], self.reward, self.pacman_alive 
+        self.reward = None 
 
     def render(self, mode='human'):
         img = copy.copy(draw_grid(self.grid[0], self.grid[1], cell_size=35, fill='white'))
@@ -92,17 +72,17 @@ class Pacman(gym.Env):
                     fill_cell(img, [i, j], cell_size=35, fill='black', margin=0.1)
 
         for i in range(self.n_ghosts):
-            fill_cell(img, self.ghost_position[i], cell_size=35, fill=(3, 190, 252), margin=0.1)
+            fill_cell(img, self.ghosts[i].get_position(), cell_size=35, fill=(3, 190, 252), margin=0.1)
         
-        fill_cell(img, self.pacman_position, cell_size=35, fill=(252, 223, 3), margin=0.1)
+        fill_cell(img, self.pacman.get_position(), cell_size=35, fill=(252, 223, 3), margin=0.1)
 
         for i in range(self.n_ghosts):
-            draw_circle(img, self.ghost_position[i], cell_size=35, fill=(2, 15, 250))
-            write_cell_text(img, text=str(i + 1), pos=self.ghost_position[i], cell_size=35,
+            draw_circle(img, self.ghosts[i].get_position(), cell_size=35, fill=(2, 15, 250))
+            write_cell_text(img, text=str(i + 1), pos=self.ghosts[i].get_position(), cell_size=35,
                             fill='white', margin=0.4)
     
-        draw_circle(img, self.pacman_position, cell_size=35, fill=(252, 248, 5))
-        write_cell_text(img, text="P", pos=self.pacman_position, cell_size=35,
+        draw_circle(img, self.pacman.get_position(), cell_size=35, fill=(252, 248, 5))
+        write_cell_text(img, text="P", pos=self.pacman.get_position(), cell_size=35,
                         fill='black', margin=0.4)
 
         img = np.asarray(img)
@@ -117,32 +97,43 @@ class Pacman(gym.Env):
 
     def reset(self):
         self.step_count = 0
-        self.pacman_alive = True
         #self.ghosts_done = [False for _ in range(self.n_ghosts)]
         self.reward = {_: 0 for _ in range(self.n_ghosts+1)}
 
-        #set positions
-        positions = self.position()
-        counter = 0 
-        for i in self.ghost_position:
-            self.ghost_position[i] = positions[counter]
-            counter += 1
-        
-        self.pacman_position = positions[counter]
-
-        return positions, self.ghost_position, self.pacman_position
-
-    def position(self):
-
         ghost_position = []
+        #set positions
         for i in range(self.n_ghosts):
-            #ghost_position.append([np.random.randint(29), np.random.randint(26)])
-            ghost_position.append([13, 11+i])
+            self.ghosts[i].reset_position()
+            ghost_position.append(self.ghosts[i].get_position())
         
-        #pacman_position = [np.random.randint(29), np.random.randint(26)]
-        pacman_position = [16, 11]
+        self.pacman.reset_position()
+        return ghost_position, self.pacman.get_position()
 
-        return np.array(ghost_position + [pacman_position])
+    def step(self, agents_action):
+        self.step_count += 1
+
+        #move
+        for agent_i, action in enumerate(agents_action):
+            if agent_i < self.n_ghosts:
+                new_ghost_position = self.next_position(copy.copy(self.ghosts[agent_i].get_position()), action)
+                self.ghosts[agent_i].set_position(new_ghost_position[0], new_ghost_position[1])
+            elif self.pacman.is_alive():
+                new_pacman_position = self.next_position(copy.copy(self.pacman.get_position()), action)
+                self.pacman.set_position(new_pacman_position[0], new_pacman_position[1])
+
+        for i in range(self.n_ghosts):
+            #se apanhar
+            if self.ghosts[i].get_position() == self.pacman.get_position():
+                self.reward[i] = 5
+                self.reward[self.n_ghosts] = -5
+                self.pacman.kill()
+            
+            #se n apanhar
+            else:
+                self.reward[i] += -1
+                self.reward[self.n_ghosts] += 1
+
+        return [self.ghosts[i].get_position() for i in range(self.n_ghosts)] + [self.pacman.get_position()], self.reward, self.pacman.is_alive()
 
     def next_position(self, curr_pos, move):
         if move == 0:  # down
