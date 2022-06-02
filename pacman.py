@@ -10,10 +10,11 @@ class Pacman(Agent):
         self.n_actions = N_ACTIONS
         self.position = [16, 11]
         self.alive = True
-        self.observation = None
+        #self.orientation = None    MAYBE???
+        #self.observation = None
 
-    def see(self, observation: np.ndarray):
-        self.observation = observation
+    '''def see(self, observation: np.ndarray):
+        self.observation = observation'''
         
     def reset_position(self):
         self.position = [16, 11]

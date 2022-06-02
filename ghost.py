@@ -11,10 +11,10 @@ class Ghost(Agent):
         self.n_agents = n_agents
         self.n_actions = N_ACTIONS
         self.position = [13, 11 + agent_id]
-        self.observation = None
+        #self.observation = None
 
-    def see(self, observation: np.ndarray):
-        self.observation = observation
+    '''def see(self, observation: np.ndarray):
+        self.observation = observation'''
         
     def reset_position(self):
         self.position = [13, 11 + self.agent_id]
