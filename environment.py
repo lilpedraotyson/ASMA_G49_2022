@@ -74,7 +74,8 @@ class Environment(gym.Env):
         for i in range(self.n_ghosts):
             fill_cell(img, self.ghosts[i].get_position(), cell_size=35, fill=(3, 190, 252), margin=0.1)
         
-        fill_cell(img, self.pacman.get_position(), cell_size=35, fill=(252, 223, 3), margin=0.1)
+        #fill_cell(img, self.pacman.get_position(), cell_size=35, fill=(252, 223, 3), margin=0.1)
+        self.draw_pacman_vision(self.pacman.get_position(), img)
 
         for i in range(self.n_ghosts):
             draw_circle(img, self.ghosts[i].get_position(), cell_size=35, fill=(2, 15, 250))
@@ -180,3 +181,19 @@ class Environment(gym.Env):
             return (0 <= pos[0] < self.grid[0]) and (0 <= pos[1] < self.grid[1]) and (self.map[pos[0]][pos[1]] != 1) and (self.map[pos[0]][pos[1]] != 2)
         else:
             return (0 <= pos[0] < self.grid[0]) and (0 <= pos[1] < self.grid[1]) and (self.map[pos[0]][pos[1]] == 0)
+
+    def draw_pacman_vision(self, position, img):
+        for i in range(4):
+            for pos in range(29):
+                if i == 0: #down
+                    next_fill = [position[0] + pos, position[1]]
+                elif i == 1: #left
+                    next_fill = [position[0], position[1] - pos]
+                elif i == 2: #up
+                    next_fill = [position[0] - pos, position[1]]
+                elif i == 3: #right
+                    next_fill = [position[0], position[1] + pos]
+                if self.is_valid(next_fill, self.n_ghosts):
+                    fill_cell(img, next_fill, cell_size=35, fill=(252, 223, 3), margin=0.1)
+                else:
+                    break
