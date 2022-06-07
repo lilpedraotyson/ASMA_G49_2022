@@ -110,11 +110,9 @@ class Environment(gym.Env):
             agent_positions.append(self.ghosts[i].get_position()[0])
             agent_positions.append(self.ghosts[i].get_position()[1])
         
-        #self.map[self.pacman.get_position()[0], self.pacman.get_position()[1]] = 0
         self.pacman.reset_position()
         agent_positions.append(self.pacman.get_position()[0])
         agent_positions.append(self.pacman.get_position()[1])
-        #self.map[self.pacman.get_position()[0], self.pacman.get_position()[1]] = 3
         return agent_positions
 
     def step(self, agents_action):
@@ -125,25 +123,29 @@ class Environment(gym.Env):
             if agent_i < self.n_ghosts:
                 self.map[self.ghosts[agent_i].get_position()[0], self.ghosts[agent_i].get_position()[1]] = 0
                 new_ghost_position = self.next_position(copy.copy(self.ghosts[agent_i].get_position()), action, agent_i)
+                if (self.map[new_ghost_position[0], new_ghost_position[1]] != 0):
+                    new_ghost_position = self.next_position(copy.copy(self.ghosts[agent_i].get_position()), self.ghosts[agent_i].action(self.map), agent_i)
                 self.ghosts[agent_i].set_position(new_ghost_position[0], new_ghost_position[1])
                 self.map[self.ghosts[agent_i].get_position()[0], self.ghosts[agent_i].get_position()[1]] = 2
+
+                if self.ghosts[agent_i].get_position() == self.pacman.get_position():
+                    self.pacman.kill()
+
             elif self.pacman.is_alive():
-                #self.map[self.pacman.get_position()[0], self.pacman.get_position()[1]] = 0
                 new_pacman_position = self.next_position(copy.copy(self.pacman.get_position()), action, agent_i)
                 self.pacman.set_position(new_pacman_position[0], new_pacman_position[1])
-                #self.map[self.pacman.get_position()[0], self.pacman.get_position()[1]] = 3
 
-        for i in range(self.n_ghosts):
+        '''for i in range(self.n_ghosts):
             #se apanhar
             if self.ghosts[i].get_position() == self.pacman.get_position():
-                self.reward[i] = 5
-                self.reward[self.n_ghosts] = -5
+                #self.reward[i] = 5
+                #self.reward[self.n_ghosts] = -5
                 self.pacman.kill()
             
-            #se n apanhar
+            se n apanhar
             else:
                 self.reward[i] += -1
-                self.reward[self.n_ghosts] += 1
+                self.reward[self.n_ghosts] += 1'''
 
         agent_positions = []
 
@@ -157,23 +159,22 @@ class Environment(gym.Env):
         return agent_positions, self.reward, self.pacman.is_alive()
 
     def next_position(self, curr_pos, move, id):
+        print("Move")
+        print(move)
+        next_pos = [curr_pos[0], curr_pos[1]]
         if move == 0:  # down
             next_pos = [curr_pos[0] + 1, curr_pos[1]]
-            if not self.is_valid(next_pos, id):
-                next_pos = self.next_position(curr_pos, np.random.randint(4), id)
         elif move == 1:  # left
             next_pos = [curr_pos[0], curr_pos[1] - 1]
-            if not self.is_valid(next_pos, id):
-                next_pos = self.next_position(curr_pos, np.random.randint(4), id)
         elif move == 2:  # up
             next_pos = [curr_pos[0] - 1, curr_pos[1]]
-            if not self.is_valid(next_pos, id):
-                next_pos = self.next_position(curr_pos, np.random.randint(4), id)
         elif move == 3:  # right
             next_pos = [curr_pos[0], curr_pos[1] + 1]
-            if not self.is_valid(next_pos, id):
+
+        if not self.is_valid(next_pos, id):
+            if (id == self.n_ghosts):
                 next_pos = self.next_position(curr_pos, np.random.randint(4), id)
-        #elif move == 4:  # no-op
+
         return next_pos
 
     def is_valid(self, pos, id):
