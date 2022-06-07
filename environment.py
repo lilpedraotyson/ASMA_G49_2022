@@ -70,18 +70,18 @@ class Environment(gym.Env):
                     fill_cell(img, [i, j], cell_size=35, fill='black', margin=0.1)
 
         for i in range(self.n_ghosts):
-            fill_cell(img, self.ghosts[i].get_position(), cell_size=35, fill=(3, 190, 252), margin=0.1)
+            fill_cell(img, self.ghosts[i].position, cell_size=35, fill=(3, 190, 252), margin=0.1)
         
         #fill_cell(img, self.pacman.get_position(), cell_size=35, fill=(252, 223, 3), margin=0.1)
-        self.draw_pacman_vision(self.pacman.get_position(), img)
+        self.draw_pacman_vision(self.pacman.position, img)
 
         for i in range(self.n_ghosts):
-            draw_circle(img, self.ghosts[i].get_position(), cell_size=35, fill=(2, 15, 250))
-            write_cell_text(img, text=str(i + 1), pos=self.ghosts[i].get_position(), cell_size=35,
+            draw_circle(img, self.ghosts[i].position, cell_size=35, fill=(2, 15, 250))
+            write_cell_text(img, text=str(i + 1), pos=self.ghosts[i].position, cell_size=35,
                             fill='white', margin=0.4)
     
-        draw_circle(img, self.pacman.get_position(), cell_size=35, fill=(252, 248, 5))
-        write_cell_text(img, text="P", pos=self.pacman.get_position(), cell_size=35,
+        draw_circle(img, self.pacman.position, cell_size=35, fill=(252, 248, 5))
+        write_cell_text(img, text="P", pos=self.pacman.position, cell_size=35,
                         fill='black', margin=0.4)
 
         img = np.asarray(img)
@@ -102,15 +102,15 @@ class Environment(gym.Env):
         agent_positions = []
         #set positions
         for i in range(self.n_ghosts):
-            self.map[self.ghosts[i].get_position()[0], self.ghosts[i].get_position()[1]] = 0
+            self.map[self.ghosts[i].position[0], self.ghosts[i].position[1]] = 0
             self.ghosts[i].reset_position()
-            self.map[self.ghosts[i].get_position()[0], self.ghosts[i].get_position()[1]] = 2
-            agent_positions.append(self.ghosts[i].get_position()[0])
-            agent_positions.append(self.ghosts[i].get_position()[1])
+            self.map[self.ghosts[i].position[0], self.ghosts[i].position[1]] = 2
+            agent_positions.append(self.ghosts[i].position[0])
+            agent_positions.append(self.ghosts[i].position[1])
         
         self.pacman.reset_position()
-        agent_positions.append(self.pacman.get_position()[0])
-        agent_positions.append(self.pacman.get_position()[1])
+        agent_positions.append(self.pacman.position[0])
+        agent_positions.append(self.pacman.position[1])
         return agent_positions
 
     def step(self, agents_action):
@@ -119,18 +119,18 @@ class Environment(gym.Env):
         #move
         for agent_i, action in enumerate(agents_action):
             if agent_i < self.n_ghosts:
-                self.map[self.ghosts[agent_i].get_position()[0], self.ghosts[agent_i].get_position()[1]] = 0
-                new_ghost_position = self.next_position(copy.copy(self.ghosts[agent_i].get_position()), action, agent_i)
+                self.map[self.ghosts[agent_i].position[0], self.ghosts[agent_i].position[1]] = 0
+                new_ghost_position = self.next_position(copy.copy(self.ghosts[agent_i].position), action, agent_i)
                 if (self.map[new_ghost_position[0], new_ghost_position[1]] != 0):
-                    new_ghost_position = self.next_position(copy.copy(self.ghosts[agent_i].get_position()), self.ghosts[agent_i].action(self.map), agent_i)
+                    new_ghost_position = self.next_position(copy.copy(self.ghosts[agent_i].position), self.ghosts[agent_i].action(self.map), agent_i)
                 self.ghosts[agent_i].set_position(new_ghost_position[0], new_ghost_position[1])
-                self.map[self.ghosts[agent_i].get_position()[0], self.ghosts[agent_i].get_position()[1]] = 2
+                self.map[self.ghosts[agent_i].position[0], self.ghosts[agent_i].position[1]] = 2
 
-                if self.ghosts[agent_i].get_position() == self.pacman.get_position():
+                if self.ghosts[agent_i].position == self.pacman.position:
                     self.pacman.kill()
 
             elif self.pacman.is_alive():
-                new_pacman_position = self.next_position(copy.copy(self.pacman.get_position()), action, agent_i)
+                new_pacman_position = self.next_position(copy.copy(self.pacman.position), action, agent_i)
                 self.pacman.set_position(new_pacman_position[0], new_pacman_position[1])
 
         '''for i in range(self.n_ghosts):
@@ -148,11 +148,11 @@ class Environment(gym.Env):
         agent_positions = []
 
         for i in range(self.n_ghosts):
-            agent_positions.append(self.ghosts[i].get_position()[0])
-            agent_positions.append(self.ghosts[i].get_position()[1])
+            agent_positions.append(self.ghosts[i].position[0])
+            agent_positions.append(self.ghosts[i].position[1])
 
-        agent_positions.append(self.pacman.get_position()[0])
-        agent_positions.append(self.pacman.get_position()[1])
+        agent_positions.append(self.pacman.position[0])
+        agent_positions.append(self.pacman.position[1])
 
         return agent_positions, self.pacman.is_alive()
 
@@ -167,7 +167,11 @@ class Environment(gym.Env):
         elif move == 3:  # right
             next_pos = [curr_pos[0], curr_pos[1] + 1]
 
-        if not self.is_valid(next_pos) and id == self.n_ghosts:
+        if id == self.n_ghosts and (not self.is_valid(next_pos) or not self.check_ghost()):
+            print("Entrei")
+            print(curr_pos)
+            print(next_pos)
+            print(move)
             next_pos = self.next_position(curr_pos, self.pacman.action(1), id)
 
         return next_pos
@@ -190,9 +194,39 @@ class Environment(gym.Env):
                 next_fill = [position[0] - pos, position[1]]
             elif i == 3: #right
                 next_fill = [position[0], position[1] + pos]
-            elif i == 4:
+            else:
                 next_fill = position
             if self.is_valid(next_fill):
                 fill_cell(img, next_fill, cell_size=35, fill=(252, 223, 3), margin=0.1)
             else:
                 break
+
+    def check_ghost(self):
+        i = self.pacman.orientation
+
+        if i == 0:
+            for pos in range(29 - self.pacman.position[0]):
+                if (28 < self.pacman.position[0] + pos < 0) or self.map[self.pacman.position[0] + pos, self.pacman.position[1]] == 1:
+                    break
+                elif self.map[self.pacman.position[0] + pos, self.pacman.position[1]] == 2: #down
+                    return False
+        elif i == 1:
+            for pos in range (self.pacman.position[1] + 1):
+                if (25 < self.pacman.position[1] - pos < 0) or self.map[self.pacman.position[0], self.pacman.position[1] - pos] == 1:
+                    break
+                elif self.map[self.pacman.position[0], self.pacman.position[1] - pos] == 2: #left
+                    return False
+        elif i == 2:
+            for pos in range (self.pacman.position[0] + 1):
+                if (28 < self.pacman.position[0] - pos < 0) or self.map[self.pacman.position[0] - pos, self.pacman.position[1]] == 1:
+                    break
+                elif self.map[self.pacman.position[0] - pos, self.pacman.position[1]] == 2: #up
+                    return False
+        elif i == 3:
+            for pos in range(26 - self.pacman.position[0]):
+                if (25 < self.pacman.position[1] + pos < 0) or self.map[self.pacman.position[0], self.pacman.position[1] + pos] == 1:
+                    break
+                elif self.map[self.pacman.position[0], self.pacman.position[1] + pos] == 2: #right
+                    return False
+        
+        return True

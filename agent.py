@@ -47,14 +47,6 @@ class Agent(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def print_position(self):
-        raise NotImplementedError()
-
-    @abstractmethod
-    def get_position(self):
-        raise NotImplementedError()
-
-    @abstractmethod
     def set_position(self, line, column):
         raise NotImplementedError()
 

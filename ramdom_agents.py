@@ -10,7 +10,7 @@ if __name__ == '__main__':
     observation = environment.reset()
     print('ghost position: {} pacman position: {}'.format(observation[:(n_agents - 1) * 2], observation[(n_agents - 1) * 2:]))
     
-    sleep(1)
+    sleep(0.5)
     alive = True
     while alive:
         for i in range(n_agents - 1):
