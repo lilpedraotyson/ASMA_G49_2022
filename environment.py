@@ -223,7 +223,7 @@ class Environment(gym.Env):
                 elif self.map[self.pacman.position[0] - pos, self.pacman.position[1]] == 2: #up
                     return False
         elif i == 3:
-            for pos in range(26 - self.pacman.position[0]):
+            for pos in range(26 - self.pacman.position[1]):
                 if (25 < self.pacman.position[1] + pos < 0) or self.map[self.pacman.position[0], self.pacman.position[1] + pos] == 1:
                     break
                 elif self.map[self.pacman.position[0], self.pacman.position[1] + pos] == 2: #right

@@ -20,4 +20,4 @@ if __name__ == '__main__':
         print('positions: {} pacman alive?: {}'.format(next_obs, alive))
         observation = next_obs
         environment.render()
-        sleep(1)
+        sleep(0.5)
