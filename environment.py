@@ -59,9 +59,7 @@ class Environment(gym.Env):
 
         #observation
         self.observation_space = MultiAgentObservationSpace([spaces.Box(low= np.array([0, 0]), high= np.array([29, 26])) for _ in range(self.n_ghosts+1)])
-
-        #reward
-        self.reward = None 
+ 
 
     def render(self, mode='human'):
         img = copy.copy(draw_grid(self.grid[0], self.grid[1], cell_size=35, fill='white'))
@@ -156,11 +154,9 @@ class Environment(gym.Env):
         agent_positions.append(self.pacman.get_position()[0])
         agent_positions.append(self.pacman.get_position()[1])
 
-        return agent_positions, self.reward, self.pacman.is_alive()
+        return agent_positions, self.pacman.is_alive()
 
     def next_position(self, curr_pos, move, id):
-        print("Move")
-        print(move)
         next_pos = [curr_pos[0], curr_pos[1]]
         if move == 0:  # down
             next_pos = [curr_pos[0] + 1, curr_pos[1]]
@@ -171,30 +167,32 @@ class Environment(gym.Env):
         elif move == 3:  # right
             next_pos = [curr_pos[0], curr_pos[1] + 1]
 
-        if not self.is_valid(next_pos, id):
-            if (id == self.n_ghosts):
-                next_pos = self.next_position(curr_pos, np.random.randint(4), id)
+        if not self.is_valid(next_pos) and id == self.n_ghosts:
+            next_pos = self.next_position(curr_pos, self.pacman.action(1), id)
 
         return next_pos
 
-    def is_valid(self, pos, id):
-        if (id < self.n_ghosts):
+    def is_valid(self, pos):
+        '''if (id < self.n_ghosts):
             return (0 <= pos[0] < self.grid[0]) and (0 <= pos[1] < self.grid[1]) and (self.map[pos[0]][pos[1]] != 1) and (self.map[pos[0]][pos[1]] != 2)
-        else:
-            return (0 <= pos[0] < self.grid[0]) and (0 <= pos[1] < self.grid[1]) and (self.map[pos[0]][pos[1]] == 0)
+        else:'''
+        return (0 <= pos[0] < self.grid[0]) and (0 <= pos[1] < self.grid[1]) and (self.map[pos[0]][pos[1]] == 0)
 
     def draw_pacman_vision(self, position, img):
-        for i in range(4):
-            for pos in range(29):
-                if i == 0: #down
-                    next_fill = [position[0] + pos, position[1]]
-                elif i == 1: #left
-                    next_fill = [position[0], position[1] - pos]
-                elif i == 2: #up
-                    next_fill = [position[0] - pos, position[1]]
-                elif i == 3: #right
-                    next_fill = [position[0], position[1] + pos]
-                if self.is_valid(next_fill, self.n_ghosts):
-                    fill_cell(img, next_fill, cell_size=35, fill=(252, 223, 3), margin=0.1)
-                else:
-                    break
+        #for i in range(4):
+        i = self.pacman.orientation
+        for pos in range(29):
+            if i == 0: #down
+                next_fill = [position[0] + pos, position[1]]
+            elif i == 1: #left
+                next_fill = [position[0], position[1] - pos]
+            elif i == 2: #up
+                next_fill = [position[0] - pos, position[1]]
+            elif i == 3: #right
+                next_fill = [position[0], position[1] + pos]
+            elif i == 4:
+                next_fill = position
+            if self.is_valid(next_fill):
+                fill_cell(img, next_fill, cell_size=35, fill=(252, 223, 3), margin=0.1)
+            else:
+                break

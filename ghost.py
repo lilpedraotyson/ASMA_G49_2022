@@ -17,7 +17,6 @@ class Ghost(Agent):
 
     def see(self, observation: np.ndarray):
         self.observation = observation
-        #print(observation)
         
     def reset_position(self):
         self.position = [13, 11 + self.agent_id]
@@ -81,7 +80,7 @@ class Ghost(Agent):
                 while current is not None:
                     path.append(current.position)
                     current = current.parent
-                print(path[::-1])
+                #print(path[::-1])
                 return self.ret_move(path[::-1])
             
             # Generate children

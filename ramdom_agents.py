@@ -15,8 +15,9 @@ if __name__ == '__main__':
     while alive:
         for i in range(n_agents - 1):
             environment.ghosts[i].see(observation)
-        next_obs, reward, alive = environment.step([environment.ghosts[i].action(environment.map) for i in range(n_agents - 1)] + [environment.pacman.action()])
-        print('positions: {} reward: {} pacman alive?: {}'.format(next_obs, reward, alive))
+            environment.pacman.see(observation)
+        next_obs, alive = environment.step([environment.ghosts[i].action(environment.map) for i in range(n_agents - 1)] + [environment.pacman.action(environment.step_count)])
+        print('positions: {} pacman alive?: {}'.format(next_obs, alive))
         observation = next_obs
         environment.render()
         sleep(1)

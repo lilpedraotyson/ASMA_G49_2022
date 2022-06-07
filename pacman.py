@@ -10,7 +10,7 @@ class Pacman(Agent):
         self.n_actions = N_ACTIONS
         self.position = [16, 11]
         self.alive = True
-        #self.orientation = None    MAYBE???
+        self.orientation = 4
         #self.observation = None
 
     '''def see(self, observation: np.ndarray):
@@ -35,5 +35,8 @@ class Pacman(Agent):
     def kill(self):
         self.alive = False
 
-    def action(self) -> int:
-        return np.random.randint(4)
+    def action(self, step) -> int:
+        if (step == 1):
+            self.orientation = np.random.randint(4)
+
+        return self.orientation
