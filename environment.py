@@ -133,18 +133,6 @@ class Environment(gym.Env):
                 new_pacman_position = self.next_position(copy.copy(self.pacman.position), action, agent_i)
                 self.pacman.set_position(new_pacman_position[0], new_pacman_position[1])
 
-        '''for i in range(self.n_ghosts):
-            #se apanhar
-            if self.ghosts[i].get_position() == self.pacman.get_position():
-                #self.reward[i] = 5
-                #self.reward[self.n_ghosts] = -5
-                self.pacman.kill()
-            
-            se n apanhar
-            else:
-                self.reward[i] += -1
-                self.reward[self.n_ghosts] += 1'''
-
         agent_positions = []
 
         for i in range(self.n_ghosts):
@@ -167,19 +155,16 @@ class Environment(gym.Env):
         elif move == 3:  # right
             next_pos = [curr_pos[0], curr_pos[1] + 1]
 
-        if id == self.n_ghosts and (not self.is_valid(next_pos) or not self.check_ghost()):
-            print("Entrei")
-            print(curr_pos)
-            print(next_pos)
-            print(move)
+        if id == self.n_ghosts and not self.way_out():
+            if (self.is_valid(next_pos)):
+                return next_pos
+
+        if id == self.n_ghosts and (not self.is_valid(next_pos) or not self.check_ghost(self.pacman.orientation)):
             next_pos = self.next_position(curr_pos, self.pacman.action(1), id)
 
         return next_pos
 
     def is_valid(self, pos):
-        '''if (id < self.n_ghosts):
-            return (0 <= pos[0] < self.grid[0]) and (0 <= pos[1] < self.grid[1]) and (self.map[pos[0]][pos[1]] != 1) and (self.map[pos[0]][pos[1]] != 2)
-        else:'''
         return (0 <= pos[0] < self.grid[0]) and (0 <= pos[1] < self.grid[1]) and (self.map[pos[0]][pos[1]] == 0)
 
     def draw_pacman_vision(self, position, img):
@@ -201,9 +186,7 @@ class Environment(gym.Env):
             else:
                 break
 
-    def check_ghost(self):
-        i = self.pacman.orientation
-
+    def check_ghost(self, i):
         if i == 0:
             for pos in range(29 - self.pacman.position[0]):
                 if (28 < self.pacman.position[0] + pos < 0) or self.map[self.pacman.position[0] + pos, self.pacman.position[1]] == 1:
@@ -230,3 +213,17 @@ class Environment(gym.Env):
                     return False
         
         return True
+
+    def way_out(self):
+        for i in range (4):
+            if (self.check_ghost(i)):
+                if (i == 0) and (28 < self.pacman.position[0] + 1 < 0) and self.map[self.pacman.position[0] + 1, self.pacman.position[1]] == 0:
+                    return True
+                elif (i == 1) and (25 < self.pacman.position[1] - 1 < 0) and self.map[self.pacman.position[0], self.pacman.position[1] - 1] == 0:
+                    return True
+                elif (i == 2) and (28 < self.pacman.position[0] - 1 < 0) and self.map[self.pacman.position[0] - 1, self.pacman.position[1]] == 0:
+                    return True
+                elif (i == 3) and (25 < self.pacman.position[1] + 1 < 0) and self.map[self.pacman.position[0], self.pacman.position[1] + 1] == 0:
+                    return True
+        return False
+

@@ -11,11 +11,3 @@ class Node():
 
     def __eq__(self, other):
         return self.position == other.position
-
-    '''def prints(self):
-        print("Node")
-        print(self.parent)
-        print(self.position)
-        #print(self.g)
-        #print(self.h)
-        #print(self.f)'''

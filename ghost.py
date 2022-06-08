@@ -21,9 +21,6 @@ class Ghost(Agent):
     def reset_position(self):
         self.position = [13, 11 + self.agent_id]
 
-    '''def print_position(self):
-        print (self.position)'''
-
     def set_position(self, line, column):
         self.position = [line, column]
 
