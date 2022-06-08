@@ -215,15 +215,23 @@ class Environment(gym.Env):
         return True
 
     def way_out(self):
+        options = []
         for i in range (4):
             if (self.check_ghost(i)):
-                if (i == 0) and (28 < self.pacman.position[0] + 1 < 0) and self.map[self.pacman.position[0] + 1, self.pacman.position[1]] == 0:
-                    return True
-                elif (i == 1) and (25 < self.pacman.position[1] - 1 < 0) and self.map[self.pacman.position[0], self.pacman.position[1] - 1] == 0:
-                    return True
-                elif (i == 2) and (28 < self.pacman.position[0] - 1 < 0) and self.map[self.pacman.position[0] - 1, self.pacman.position[1]] == 0:
-                    return True
-                elif (i == 3) and (25 < self.pacman.position[1] + 1 < 0) and self.map[self.pacman.position[0], self.pacman.position[1] + 1] == 0:
-                    return True
-        return False
+                if (i == 0) and (28 > self.pacman.position[0] + 1 > 0) and self.map[self.pacman.position[0] + 1, self.pacman.position[1]] == 0:
+                    options.append(i)
+                    #return True
+                elif (i == 1) and (25 > self.pacman.position[1] - 1 > 0) and self.map[self.pacman.position[0], self.pacman.position[1] - 1] == 0:
+                    options.append(i)
+                    #return True
+                elif (i == 2) and (28 > self.pacman.position[0] - 1 > 0) and self.map[self.pacman.position[0] - 1, self.pacman.position[1]] == 0:
+                    options.append(i)
+                    #return True
+                elif (i == 3) and (25 > self.pacman.position[1] + 1 > 0) and self.map[self.pacman.position[0], self.pacman.position[1] + 1] == 0:
+                    options.append(i)
+                    #return True
+        if len(options) > 0:
+            return True
+        else:
+            return False
 
