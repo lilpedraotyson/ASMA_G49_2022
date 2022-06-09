@@ -9,7 +9,6 @@ from ma_gym.envs.utils.action_space import MultiAgentActionSpace
 from ma_gym.envs.utils.observation_space import MultiAgentObservationSpace
 from ma_gym.envs.utils.draw import draw_grid, fill_cell, draw_circle, write_cell_text
 
-from ghost import Ghost
 from pacman import Pacman
 
 class Environment(gym.Env):
@@ -55,7 +54,7 @@ class Environment(gym.Env):
 
         #create agents
         self.pacman = Pacman()
-        self.ghosts = {i: Ghost(i, self.n_ghosts) for i in range(self.n_ghosts)}
+        self.ghosts = None
 
         #observation
         self.observation_space = MultiAgentObservationSpace([spaces.Box(low= np.array([0, 0]), high= np.array([29, 26])) for _ in range(self.n_ghosts+1)])
@@ -122,7 +121,7 @@ class Environment(gym.Env):
                 self.map[self.ghosts[agent_i].position[0], self.ghosts[agent_i].position[1]] = 0
                 new_ghost_position = self.next_position(copy.copy(self.ghosts[agent_i].position), action, agent_i)
                 if (self.map[new_ghost_position[0], new_ghost_position[1]] != 0):
-                    new_ghost_position = self.next_position(copy.copy(self.ghosts[agent_i].position), self.ghosts[agent_i].action(self.map), agent_i)
+                    new_ghost_position = self.next_position(copy.copy(self.ghosts[agent_i].position), self.ghosts[agent_i].action(self.map, self.step_count), agent_i)
                 self.ghosts[agent_i].set_position(new_ghost_position[0], new_ghost_position[1])
                 self.map[self.ghosts[agent_i].position[0], self.ghosts[agent_i].position[1]] = 2
 
@@ -158,6 +157,8 @@ class Environment(gym.Env):
         if id == self.n_ghosts and not self.way_out():
             if (self.is_valid(next_pos)):
                 return next_pos
+            else:
+                return curr_pos
 
         if id == self.n_ghosts and (not self.is_valid(next_pos) or not self.check_ghost(self.pacman.orientation)):
             next_pos = self.next_position(curr_pos, self.pacman.action(1), id)
@@ -218,16 +219,16 @@ class Environment(gym.Env):
         options = []
         for i in range (4):
             if (self.check_ghost(i)):
-                if (i == 0) and (28 > self.pacman.position[0] + 1 > 0) and self.map[self.pacman.position[0] + 1, self.pacman.position[1]] == 0:
+                if (i == 0) and (29 > self.pacman.position[0] + 1 > 0) and self.map[self.pacman.position[0] + 1, self.pacman.position[1]] == 0:
                     options.append(i)
                     #return True
-                elif (i == 1) and (25 > self.pacman.position[1] - 1 > 0) and self.map[self.pacman.position[0], self.pacman.position[1] - 1] == 0:
+                elif (i == 1) and (26 > self.pacman.position[1] - 1 > 0) and self.map[self.pacman.position[0], self.pacman.position[1] - 1] == 0:
                     options.append(i)
                     #return True
-                elif (i == 2) and (28 > self.pacman.position[0] - 1 > 0) and self.map[self.pacman.position[0] - 1, self.pacman.position[1]] == 0:
+                elif (i == 2) and (29 > self.pacman.position[0] - 1 > 0) and self.map[self.pacman.position[0] - 1, self.pacman.position[1]] == 0:
                     options.append(i)
                     #return True
-                elif (i == 3) and (25 > self.pacman.position[1] + 1 > 0) and self.map[self.pacman.position[0], self.pacman.position[1] + 1] == 0:
+                elif (i == 3) and (26 > self.pacman.position[1] + 1 > 0) and self.map[self.pacman.position[0], self.pacman.position[1] + 1] == 0:
                     options.append(i)
                     #return True
         if len(options) > 0:

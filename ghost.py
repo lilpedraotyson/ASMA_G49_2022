@@ -14,6 +14,7 @@ class Ghost(Agent):
         self.n_actions = N_ACTIONS
         self.position = [13, 11 + agent_id]
         self.observation = None
+        self.alive = True
 
     def see(self, observation: np.ndarray):
         self.observation = observation
@@ -37,7 +38,7 @@ class Ghost(Agent):
         elif move == [0, -1]:
             return 3
 
-    def action(self, map: np.ndarray) -> int:
+    def action(self, map: np.ndarray, step) -> int:
         # Create start and end node
         start_node = Node(None, self.position)
         start_node.g = start_node.h = start_node.f = 0
