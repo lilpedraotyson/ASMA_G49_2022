@@ -55,7 +55,7 @@ def run_multiple_agents(environment, n_agents, episodes, tipo, alive=True):
             print('positions: {} pacman alive?: {}'.format(next_obs, alive))
             observation = next_obs
             environment.render()
-            #sleep(0.5)
+            sleep(0.5)
         meanaux.append(environment.step_count)
         if not alive:
             win_count += 1
@@ -69,11 +69,11 @@ if __name__ == '__main__':
     tipo = ["random", "hybrid"]
     mean = []
 
-    #aux_mean, aux_win = run_multiple_agents(environment, n_agents, episodes, tipo[0])
-    #print(aux_mean)
-    #print(aux_win)
-    #mean.append(aux_mean)
-    #showPieResults(tipo[0], aux_win)
+    aux_mean, aux_win = run_multiple_agents(environment, n_agents, episodes, tipo[0])
+    print(aux_mean)
+    print(aux_win)
+    mean.append(aux_mean)
+    showPieResults(tipo[0], aux_win)
 
     aux_mean, aux_win = run_multiple_agents(environment, n_agents, episodes, tipo[1])
     print(aux_mean)

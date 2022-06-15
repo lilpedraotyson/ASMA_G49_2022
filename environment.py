@@ -145,6 +145,12 @@ class Environment(gym.Env):
 
     def next_position(self, curr_pos, move, id):
         next_pos = [curr_pos[0], curr_pos[1]]
+        opt = self.way_out()
+        
+        if id == self.n_ghosts and len(opt) > 2:
+            move = opt[np.random.randint(len(opt))]
+            self.pacman.orientation = move
+
         if move == 0:  # down
             next_pos = [curr_pos[0] + 1, curr_pos[1]]
         elif move == 1:  # left
@@ -154,7 +160,7 @@ class Environment(gym.Env):
         elif move == 3:  # right
             next_pos = [curr_pos[0], curr_pos[1] + 1]
 
-        if id == self.n_ghosts and not self.way_out():
+        if id == self.n_ghosts and len(opt) == 0:
             if (self.is_valid(next_pos)):
                 return next_pos
             else:
@@ -221,18 +227,15 @@ class Environment(gym.Env):
             if (self.check_ghost(i)):
                 if (i == 0) and (29 > self.pacman.position[0] + 1 > 0) and self.map[self.pacman.position[0] + 1, self.pacman.position[1]] == 0:
                     options.append(i)
-                    #return True
                 elif (i == 1) and (26 > self.pacman.position[1] - 1 > 0) and self.map[self.pacman.position[0], self.pacman.position[1] - 1] == 0:
                     options.append(i)
-                    #return True
                 elif (i == 2) and (29 > self.pacman.position[0] - 1 > 0) and self.map[self.pacman.position[0] - 1, self.pacman.position[1]] == 0:
                     options.append(i)
-                    #return True
                 elif (i == 3) and (26 > self.pacman.position[1] + 1 > 0) and self.map[self.pacman.position[0], self.pacman.position[1] + 1] == 0:
                     options.append(i)
-                    #return True
-        if len(options) > 0:
+        '''if len(options) > 0:
             return True
         else:
-            return False
+            return False'''
+        return options
 

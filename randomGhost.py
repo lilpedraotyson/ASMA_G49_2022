@@ -46,13 +46,30 @@ class RandomGhost(Agent):
         if self.flag > 500:
             self.alive = False
             return np.random.randint(4)
-        if np.remainder(step, 10) == 0:
-            self.orientation = np.random.randint(4)
+        if np.remainder(step, 10) == 0 and ((11 <= self.position[0] <= 15) and (9 <= self.position[1] <= 16)):
+            self.orientation = 2
+        opt = self.possible_ways(map)
+        if (len(opt) > 1) and not ((11 <= self.position[0] <= 15) and (9 <= self.position[1] <= 16)) and not (self.position == [10, 12] or self.position == [10, 13]):
+            self.orientation = opt[np.random.randint(len(opt))]
         pos = self.next_position(self.position, self.orientation)
         if not (0 <= pos[0] < 29) or not (0 <= pos[1] < 26) or not (map[pos[0]][pos[1]] == 0):
             self.flag += 1
-            self.orientation = np.random.randint(4)
+            self.orientation = opt[np.random.randint(len(opt))]
             self.action(map, step)
         else:
             self.flag = 0
             return self.orientation
+
+    def possible_ways(self, map: np.ndarray):
+        options = []
+        for i in range (4):
+            if (i != self.orientation):
+                if (i == 0) and (29 > self.position[0] + 1 > 0) and map[self.position[0] + 1, self.position[1]] == 0:
+                    options.append(i)
+                elif (i == 1) and (26 > self.position[1] - 1 > 0) and map[self.position[0], self.position[1] - 1] == 0:
+                    options.append(i)
+                elif (i == 2) and (29 > self.position[0] - 1 > 0) and map[self.position[0] - 1, self.position[1]] == 0:
+                    options.append(i)
+                elif (i == 3) and (26 > self.position[1] + 1 > 0) and map[self.position[0], self.position[1] + 1] == 0:
+                    options.append(i)
+        return options
