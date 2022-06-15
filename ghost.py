@@ -75,7 +75,6 @@ class Ghost(Agent):
                 while current is not None:
                     path.append(current.position)
                     current = current.parent
-                #print(path[::-1])
                 return self.ret_move(path[::-1])
             
             # Generate children

@@ -233,9 +233,5 @@ class Environment(gym.Env):
                     options.append(i)
                 elif (i == 3) and (26 > self.pacman.position[1] + 1 > 0) and self.map[self.pacman.position[0], self.pacman.position[1] + 1] == 0:
                     options.append(i)
-        '''if len(options) > 0:
-            return True
-        else:
-            return False'''
         return options
 
