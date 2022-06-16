@@ -16,7 +16,6 @@ class Environment(gym.Env):
         #global variables
         self.n_ghosts = n_ghosts
         self.grid = (29, 26)
-        #self.ghosts_done = [None for _ in range(self.n_ghosts)]
         self.step_count = 0
         self.viewer = None
         self.map = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -71,7 +70,6 @@ class Environment(gym.Env):
         for i in range(self.n_ghosts):
             fill_cell(img, self.ghosts[i].position, cell_size=35, fill=(3, 190, 252), margin=0.1)
         
-        #fill_cell(img, self.pacman.get_position(), cell_size=35, fill=(252, 223, 3), margin=0.1)
         self.draw_pacman_vision(self.pacman.position, img)
 
         for i in range(self.n_ghosts):
@@ -95,7 +93,6 @@ class Environment(gym.Env):
 
     def reset(self):
         self.step_count = 0
-        #self.ghosts_done = [False for _ in range(self.n_ghosts)]
         self.reward = {_: 0 for _ in range(self.n_ghosts+1)}
 
         agent_positions = []
@@ -159,6 +156,8 @@ class Environment(gym.Env):
             next_pos = [curr_pos[0] - 1, curr_pos[1]]
         elif move == 3:  # right
             next_pos = [curr_pos[0], curr_pos[1] + 1]
+        elif move == 4:
+            next_pos = curr_pos
 
         if id == self.n_ghosts and len(opt) == 0:
             if (self.is_valid(next_pos)):
@@ -175,7 +174,6 @@ class Environment(gym.Env):
         return (0 <= pos[0] < self.grid[0]) and (0 <= pos[1] < self.grid[1]) and (self.map[pos[0]][pos[1]] == 0)
 
     def draw_pacman_vision(self, position, img):
-        #for i in range(4):
         i = self.pacman.orientation
         for pos in range(29):
             if i == 0: #down
