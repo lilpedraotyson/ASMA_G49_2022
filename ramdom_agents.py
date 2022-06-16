@@ -43,7 +43,7 @@ def run_multiple_agents(environment, n_agents, episodes, tipo, alive=True):
     observation = environment.reset()
     print('ghost position: {} pacman position: {}'.format(observation[:(n_agents - 1) * 2], observation[(n_agents - 1) * 2:]))
     
-    #sleep(0.5)
+    sleep(0.2)
     meanaux = []
     for _ in range(episodes):
         print("----------------------------------------------------------------------------------------------------")
@@ -57,7 +57,7 @@ def run_multiple_agents(environment, n_agents, episodes, tipo, alive=True):
             print('positions: {} pacman alive?: {}'.format(next_obs, alive))
             observation = next_obs
             environment.render()
-            sleep(0.2)
+            #sleep(0.1)
         meanaux.append(environment.step_count)
         if not alive:
             win_count += 1
@@ -71,7 +71,7 @@ if __name__ == '__main__':
     tipo = ["random", "hybrid", "socialConv"]
     mean = []
 
-    '''aux_mean, aux_win = run_multiple_agents(environment, n_agents, episodes, tipo[0])
+    aux_mean, aux_win = run_multiple_agents(environment, n_agents, episodes, tipo[0])
     print(aux_mean)
     print(aux_win)
     mean.append(aux_mean)
@@ -82,11 +82,10 @@ if __name__ == '__main__':
     print(aux_win)
     mean.append(aux_mean)
     showPieResults(tipo[1], aux_win)
-    showResults([tipo[1]], mean)'''
 
     aux_mean, aux_win = run_multiple_agents(environment, n_agents, episodes, tipo[2])
     print(aux_mean)
     print(aux_win)
     mean.append(aux_mean)
     showPieResults(tipo[2], aux_win)
-    showResults([tipo[2]], mean)
+    showResults(tipo, mean)
