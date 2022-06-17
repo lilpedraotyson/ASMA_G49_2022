@@ -5,6 +5,9 @@
  - pip install virtualenv
 
 ### create a virtualenv with the name you want:
+- virtualenv name
+
+### enter and leave the virtaulenv
 - source name/bin/activate
 - deactivate
 
